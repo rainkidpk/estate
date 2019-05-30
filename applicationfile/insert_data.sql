@@ -1,0 +1,1 @@
+insert into building(name) values('Vu Tran');
