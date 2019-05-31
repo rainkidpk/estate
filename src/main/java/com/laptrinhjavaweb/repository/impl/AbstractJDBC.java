@@ -446,12 +446,10 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 	}
 
 	private String createSQLFindById(Long id) {
-		String sql = "";
-		if (zClass.isAnnotationPresent(Table.class)) {
-			sql = zClass.getAnnotation(Table.class).name();
-		}
-		sql.concat(" WHERE id = "+id);
-		return sql;
+		StringBuilder sql = new StringBuilder("SELECT * FROM "+zClass.getAnnotation(Table.class).name());;
+
+		sql.append(" WHERE id = "+id);
+		return sql.toString();
 
 	}
 
