@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -20,10 +21,11 @@ import com.laptrinhjavaweb.annotation.Table;
 import com.laptrinhjavaweb.dto.BuildingDTO;
 import com.laptrinhjavaweb.entity.BuildingEntity;
 import com.laptrinhjavaweb.mapper.ResultSetMapper;
+import com.laptrinhjavaweb.paging.Pageble;
+import com.laptrinhjavaweb.paging.Sorter;
 import com.laptrinhjavaweb.repository.GenericJDBC;
 
 public class AbstractJDBC<T> implements GenericJDBC<T> {
-	//nay xoa bi lo ham @@
 
 	private Class<T> zClass;
 
@@ -337,40 +339,27 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 	}
 
 	@Override
-	public void delete(Object object) {
+	public void delete(long id) {
 		Connection conn = null;
 		PreparedStatement statement = null;
 		try {
 			conn = getConnection();
 			conn.setAutoCommit(false);
-			String sql = createSQLDelete();
-			statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			String tableName = "";
+			if (zClass.isAnnotationPresent(Table.class)) {
+				Table table = zClass.getAnnotation(Table.class);
+				tableName = table.name();
+			}
+
+			String sql = "DELETE FROM " + tableName + " WHERE id = ?";
+			statement = conn.prepareStatement(sql);
 			if (conn != null) {
-				Class<?> zClass = object.getClass();
-				Field[] fields = zClass.getDeclaredFields();
-				// set parameters to statement
-
-				Class<?> parentClass = zClass.getSuperclass();
-				int intdexParent = 1;
-				Object id = null;
-				while (parentClass != null) {
-					for (int i = 0; i < parentClass.getDeclaredFields().length; i++) {
-						Field field = parentClass.getDeclaredFields()[i];
-						field.setAccessible(true);
-						String name = field.getName();
-						if (name.equals("id")) {
-							id = field.get(object);
-						}
-
-					}
-					parentClass = parentClass.getSuperclass();
-				}
-				statement.setObject(intdexParent, id);
+				statement.setObject(1, id);
 				statement.executeUpdate();
 				conn.commit();
 
 			}
-		} catch (SQLException | IllegalAccessException e) {
+		} catch (SQLException e) {
 			if (conn != null) {
 				try {
 					conn.rollback();
@@ -393,115 +382,126 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 
 	}
 
-	private String createSQLDelete() {
+	@Override
+	public <T> T findById(long id) {
+		Connection conn = null;
+		PreparedStatement statement = null;
+		ResultSet rs = null;
+		ResultSetMapper<T> resultSetMapper = new ResultSetMapper<T>();
+		try {
+			conn = getConnection();
+			String tableName = "";
+			if (zClass.isAnnotationPresent(Table.class)) {
+				Table table = zClass.getAnnotation(Table.class);
+				tableName = table.name();
+			}
+			String sql = "SELECT * FROM " + tableName + " WHERE id = ?";
+			statement = conn.prepareStatement(sql);
+			statement.setObject(1, id);
+			rs = statement.executeQuery();
+			if (conn != null) {
+				return resultSetMapper.mapRow(rs, this.zClass).get(0);
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+				if (statement != null) {
+					statement.close();
+				}
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (SQLException e2) {
+				e2.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public List<T> findAll(Map<String, Object> properties, Pageble pageble, Object... where) {
+		Connection conn = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		ResultSetMapper<T> resultSetMapper = new ResultSetMapper<T>();
+
+		StringBuilder sql = createSQLfindAll(properties);
+		if (where != null && where.length > 0) {
+			sql.append(where[0]);
+		}
+		if (pageble != null) {
+			if (pageble.getOffset() != null) {
+				Sorter sorter = pageble.getSorter();
+				sql.append(" ORDER BY " +sorter.getSortName()+ " " +sorter.getSortBy()+"");
+			}
+			if (pageble.getOffset() != null && pageble.getLimit() != null) {
+				sql.append(" LIMIT " +pageble.getOffset()+ ", "+pageble.getLimit()+"");
+			}
+
+		}
+		try {
+			conn = getConnection();
+			statement = conn.createStatement();
+			rs = statement.executeQuery(sql.toString());
+			if (conn != null) {
+				return resultSetMapper.mapRow(rs, this.zClass);
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+				if (statement != null) {
+					statement.close();
+				}
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (SQLException e2) {
+				e2.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	private StringBuilder createSQLfindAll(Map<String, Object> properties) {
 		String tableName = "";
 		if (zClass.isAnnotationPresent(Table.class)) {
 			Table table = zClass.getAnnotation(Table.class);
 			tableName = table.name();
 		}
-		String where = null;
-		StringBuilder sets = new StringBuilder("");
 
-		for (Field field : zClass.getDeclaredFields()) {
-			if (field.isAnnotationPresent(Column.class)) {
-				Column column = field.getAnnotation(Column.class);
-				String columnName = column.name();
-				String value = columnName + " = ?";
-				if (!columnName.equals("id")) {
-					if (sets.length() > 1) {
-						sets.append(", ");
-					}
-					sets.append(value);
+		StringBuilder result = new StringBuilder("SELECT * FROM " + tableName + " WHERE 1=1");
+		if (properties != null && properties.size() > 0) {
+			String[] params = new String[properties.size()];
+			Object[] values = new String[properties.size()];
+			int i = 0;
+			for (Map.Entry<?, ?> item : properties.entrySet()) {
+
+				params[i] = (String) item.getKey();
+				values[i] = item.getValue();
+				i++;
+			}
+			for (int i1 = 0; i < params.length; i1++) {
+				if (values[i1] instanceof String) {
+					result.append(" and LOWER(" + params[i1] + ") LIKE '% LOWER(" + values[i1] + ")%'");
+				} else if (values[i1] instanceof Integer) {
+					result.append(" and LOWER(" + params[i1] + ") = " + values[i1] + " ");
 				}
 			}
 
 		}
-
-		// check parent class
-		Class<?> parentClass = zClass.getSuperclass();
-		while (parentClass != null) {
-			for (Field field : parentClass.getDeclaredFields()) {
-
-				if (field.isAnnotationPresent(Column.class)) {
-					Column column = field.getAnnotation(Column.class);
-					String columnName = column.name();
-					String value = columnName + " = ?";
-					if (!columnName.equals("id")) {
-						if (sets.length() > 1) {
-							sets.append(", ");
-						}
-						sets.append(value);
-					} else {
-						where = " WHERE " + value;
-					}
-
-				}
-
-			}
-			parentClass = parentClass.getSuperclass();
-		}
-
-		String sql = "DELETE FROM " + tableName + where;
-		return sql;
+		return result;
 	}
 
-	private String createSQLFindById(Long id) {
-		StringBuilder sql = new StringBuilder("SELECT * FROM "+zClass.getAnnotation(Table.class).name());;
-
-		sql.append(" WHERE id = "+id);
-		return sql.toString();
-
-	}
-
-	@Override
-	public T findById(long id) {
-		String sql = createSQLFindById(id);
-		try (Connection conn = getConnection();
-				Statement statement = conn.createStatement();
-				ResultSet resultSet = statement.executeQuery(sql);
-				){
-					ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-					Field[] fields = zClass.getDeclaredFields();
-
-					while (resultSet.next()) {
-						T object = (T) zClass.newInstance();
-						// get value 1 row of resultset and set to entity
-						for (int i = 0; i < resultSetMetaData.getColumnCount(); i++) {
-							String columnName = resultSetMetaData.getColumnName(i + 1);
-							Object columnValue = resultSet.getObject(i + 1);
-							for (Field field : fields) {
-								if (field.isAnnotationPresent(Column.class)) {
-									Column column = field.getAnnotation(Column.class);
-									if (column.name().equals(columnName) && columnValue != null) {
-										BeanUtils.setProperty(object, field.getName(), columnValue);
-										break;
-									}
-								}
-							}
-
-							Class<?> parentClass = zClass.getSuperclass();
-							while (parentClass != null) {
-								Field[] fieldParents = parentClass.getDeclaredFields();
-								for (Field field : fieldParents) {
-									if (field.isAnnotationPresent(Column.class)) {
-										Column column = field.getAnnotation(Column.class);
-										if (column.name().equals(columnName) && columnValue != null) {
-											BeanUtils.setProperty(object, field.getName(), columnValue);
-											break;
-										}
-									}
-								}
-								parentClass = parentClass.getSuperclass();
-							}
-						}
-						return object;
-					}
-				
-			
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		return null;
-	}
+	
 
 }
