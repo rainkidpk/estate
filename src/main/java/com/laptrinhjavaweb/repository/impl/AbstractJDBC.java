@@ -485,7 +485,6 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 			Object[] values = new String[properties.size()];
 			int i = 0;
 			for (Map.Entry<?, ?> item : properties.entrySet()) {
-
 				params[i] = (String) item.getKey();
 				values[i] = item.getValue();
 				i++;
