@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="<c:url value='/template/admin/assets/css/ace.min.css' />" class="ace-main-stylesheet" id="main-ace-style" />
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+     <link rel="stylesheet" href="<c:url value='/template/admin/css/custom/building-edit.css' />" class="ace-main-stylesheet" id="main-ace-style" />
 </head>
 <body class="no-skin">
 

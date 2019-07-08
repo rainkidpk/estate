@@ -479,22 +479,25 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 			tableName = table.name();
 		}
 
-		StringBuilder result = new StringBuilder("SELECT * FROM " + tableName + " WHERE 1=1");
+		StringBuilder result = new StringBuilder("SELECT * FROM " + tableName + " A WHERE 1=1");
 		if (properties != null && properties.size() > 0) {
 			String[] params = new String[properties.size()];
-			Object[] values = new String[properties.size()];
+			Object[] values = new Object[properties.size()];
 			int i = 0;
 			for (Map.Entry<?, ?> item : properties.entrySet()) {
 				params[i] = (String) item.getKey();
 				values[i] = item.getValue();
 				i++;
 			}
-			for (int i1 = 0; i < params.length; i1++) {
+			for (int i1 = 0; i1 < params.length; i1++) {
 				if (values[i1] instanceof String) {
-					result.append(" and LOWER(" + params[i1] + ") LIKE '% LOWER(" + values[i1] + ")%'");
+					result.append(" and LOWER(" + params[i1] + ") LIKE '%" + values[i1].toString().toLowerCase() + "%' ");
 				} else if (values[i1] instanceof Integer) {
-					result.append(" and LOWER(" + params[i1] + ") = " + values[i1] + " ");
-				}
+					result.append(" and " + params[i1] + " = " + values[i1] + " ");
+				} else if (values[i1] instanceof Long) {
+					result.append(" and " + params[i1] + " = " + values[i1] + " ");
+				}			
+				
 			}
 
 		}

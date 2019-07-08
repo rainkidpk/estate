@@ -27,6 +27,7 @@ public class BaseEntity {
 	private Timestamp modifiedDate;
 	
 	
+
 	public Long getId() {
 		return id;
 	}

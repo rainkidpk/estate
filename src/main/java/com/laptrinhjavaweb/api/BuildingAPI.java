@@ -63,8 +63,8 @@ public class BuildingAPI extends HttpServlet {
 		properties.put("ward", "a");
 		Sorter sorter = new Sorter("name", "desc");
 		PageRequest pageRequest = new PageRequest(1, 3, sorter);
-		List<BuildingDTO> buildingDTOs = buildingService.findAll(properties, pageRequest);
-		objectMapper.writeValue(response.getOutputStream(), buildingDTOs);
+		//List<BuildingDTO> buildingDTOs = buildingService.findAll(properties, pageRequest);
+		//objectMapper.writeValue(response.getOutputStream(), buildingDTOs);
 		
 		//objectMapper.writeValue(response.getOutputStream(), buildingDTO);
 		
