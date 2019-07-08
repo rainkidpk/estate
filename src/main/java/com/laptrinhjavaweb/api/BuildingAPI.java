@@ -22,15 +22,11 @@ import com.laptrinhjavaweb.utils.HttpUtils;
 @WebServlet("/api-admin-building")
 public class BuildingAPI extends HttpServlet {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -7874518778645326128L;
 	private IBuildingService buildingService;
 
 	public BuildingAPI() {
 		buildingService = new BuildingService();
-		System.out.printf("áđá", buildingService);
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -38,13 +34,11 @@ public class BuildingAPI extends HttpServlet {
 		ObjectMapper objectMapper = new ObjectMapper();
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
-
-		// HttpUtils.of(request.getReader()).toModel(BuildingDTO.class);
 		BuildingDTO buildingDTO = HttpUtils.of(request.getReader()).toModel(BuildingDTO.class);
-		// buildingDTO = buildingService.save(buildingDTO);
+		 buildingDTO = buildingService.save(buildingDTO);
 		// buildingDTO = buildingService.update(buildingDTO, buildingDTO.getId());
-		 buildingService.delete(buildingDTO, buildingDTO.getId());;
-		 //buildingService.findById(id);
+		//buildingService.delete(buildingDTO, buildingDTO.getId());	
+		// buildingService.findById(id);
 
 		objectMapper.writeValue(response.getOutputStream(), buildingDTO);
 	}
@@ -54,21 +48,21 @@ public class BuildingAPI extends HttpServlet {
 		ObjectMapper objectMapper = new ObjectMapper();
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
-		//long id = Long.parseLong(request.getParameter("id"));
+		// long id = Long.parseLong(request.getParameter("id"));
 //		BuildingDTO buildingDTO = HttpUtils.of(request.getReader()).toModel(BuildingDTO.class);
-		//BuildingDTO buildingDTO = buildingService.findById(id);
-		
-		Map<String,Object> properties = new HashMap<>();
+		// BuildingDTO buildingDTO = buildingService.findById(id);
+
+		Map<String, Object> properties = new HashMap<>();
 		properties.put("name", "a");
 		properties.put("ward", "a");
 		Sorter sorter = new Sorter("name", "desc");
 		PageRequest pageRequest = new PageRequest(1, 3, sorter);
-		//List<BuildingDTO> buildingDTOs = buildingService.findAll(properties, pageRequest);
-		//objectMapper.writeValue(response.getOutputStream(), buildingDTOs);
-		
-		//objectMapper.writeValue(response.getOutputStream(), buildingDTO);
-		
-		
+		// List<BuildingDTO> buildingDTOs = buildingService.findAll(properties,
+		// pageRequest);
+		// objectMapper.writeValue(response.getOutputStream(), buildingDTOs);
+
+		// objectMapper.writeValue(response.getOutputStream(), buildingDTO);
+
 	}
 
 //	private Long getId(HttpServletRequest request) {

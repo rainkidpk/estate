@@ -6,21 +6,30 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.laptrinhjavaweb.builder.BuildingSearchBuilder;
 import com.laptrinhjavaweb.converter.BuildingConverter;
 import com.laptrinhjavaweb.dto.BuildingDTO;
 import com.laptrinhjavaweb.entity.BuildingEntity;
+import com.laptrinhjavaweb.entity.RentAreaEntity;
 import com.laptrinhjavaweb.paging.Pageble;
 import com.laptrinhjavaweb.repository.IBuildingRepository;
+import com.laptrinhjavaweb.repository.IRentAreaRepository;
+import com.laptrinhjavaweb.repository.impl.BuildingRepository;
+import com.laptrinhjavaweb.repository.impl.RentAreaRepository;
 import com.laptrinhjavaweb.service.IBuildingService;
 
 public class BuildingService implements IBuildingService {
 	
-	@Inject
-	private IBuildingRepository buildingRepository;
+	//@Inject
+	private IBuildingRepository buildingRepository = new BuildingRepository();
 	
-	@Inject
-	private BuildingConverter buildingConverter;
+	//@Inject
+	private BuildingConverter buildingConverter = new BuildingConverter();
+	
+	//@Inject
+	private IRentAreaRepository rentAreaRepository = new RentAreaRepository();
 
 	 /*public BuildingService() {
 		if(buildingRepository == null) {
@@ -36,8 +45,20 @@ public class BuildingService implements IBuildingService {
 	public BuildingDTO save(BuildingDTO buildingDTO) {
 		BuildingEntity buildingEntity = buildingConverter.converterToEntity(buildingDTO);
 		buildingEntity.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+		buildingEntity.setCreatedBy("");
+		buildingEntity.setType(StringUtils.join(buildingDTO.getBuildingTypes(), ","));
 		Long id = buildingRepository.insert(buildingEntity);
-		return null;
+		
+		//save rentarea
+		for (String item : buildingDTO.getRentArea().split(",")) {
+			RentAreaEntity rentArea = new RentAreaEntity();
+			rentArea.setValue(item);
+			rentArea.setBuildingId(id);
+			rentAreaRepository.insert(rentArea);
+		}
+		
+		
+		return buildingConverter.converterToDto(buildingRepository.findById(id));
 	}
 
 	@Override
@@ -72,6 +93,11 @@ public class BuildingService implements IBuildingService {
 		List<BuildingDTO> result = buildingEntities.stream().map(item -> buildingConverter.converterToDto(item))
 				.collect(Collectors.toList());
 		return result;
+	}
+
+	@Override
+	public BuildingDTO findById(long id) {		
+		return buildingConverter.converterToDto(buildingRepository.findById(id));
 	}
 
 	

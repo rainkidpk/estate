@@ -12,4 +12,5 @@ public interface IBuildingService {
 	BuildingDTO delete(BuildingDTO buildingDTO,Long id);
 	BuildingDTO findById(Long id);
 	List<BuildingDTO> findAll(BuildingSearchBuilder buildingSearchBuilder, Pageble pageRequest);
+	BuildingDTO findById(long id);
 }

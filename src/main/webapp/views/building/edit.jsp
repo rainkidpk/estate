@@ -1,6 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@include file="/common/taglib.jsp"%>
+<c:url var="buildingAPI" value="/api-admin-building"/>
+<c:url var="buildingURL" value="/admin-building"/>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -25,7 +28,7 @@
 						<label class="col-sm-3 control-label no-padding-right">Tên
 							sản phẩm</label>
 						<div class="col-sm-9">
-							<input type="text" class="form-control" name="name" value="${model.name}"/>
+							<input type="text" class="form-control" name="name" value="${model.name}" id="name"/>
 						</div>
 					</div>
 				</div>
@@ -34,7 +37,7 @@
 						<label class="col-sm-3 control-label no-padding-right">Diện
 							tích sàn</label>
 						<div class="col-sm-9">
-							<input type="number" class="form-control" name="buildingArea" value="${model.buildingArea}"/>
+							<input type="number" class="form-control" name="buildingArea" value="${model.buildingArea}" id="buildingArea"/>
 						</div>
 					</div>
 				</div>
@@ -145,6 +148,7 @@
 						</div>
 					</div>
 				</div>
+				<input type="hidden" name="id" value="${model.id}" id="buildingId"/>
 				</form>
 				<!-- <div class="row">
 					<div class="form-group abc">
@@ -168,6 +172,56 @@
 		</div>
 	</div>
 	<!-- /.main-content -->
+	
+<script type="text/javascript">
+	$("#btnAddorUpdateBuilding").click(function(){
+		addOrUpdateBuilding();
+	});
+	
+	function addOrUpdateBuilding(){
+		var buildingId = $('#buildingId').val();
+		var formData = $('#formEdit').serializeArray();
+		var data = {};
+		var buildingTypes = [];
+		$.each(formData, function(index, v){
+			if (v.name == 'buildingTypes'){
+				buildingTypes.push(v.value);
+			} else {
+				data[""+v.name+""] = v.value;
+			}	
+		});
+		data['buildingTypes'] = buildingTypes;
+		if(buildingId == ''){
+			addBuilding(data);
+		} else {
+			editBuilding(data,buildingId);
+		}
+	}
+	
+	function addBuilding(data){
+		$.ajax({
+			url: '${buildingAPI}',
+			data: JSON.stringify(data),
+			type: 'POST',			
+			contentType: 'application/json',	
+			dataType: 'json',
+			success: function(data) {
+				window.location.href = "${buildingURL}?action=EDIT&id="+data.id+"&message=insert_success";
+				
+			},
+			error: function() {
+				window.location.href = "${buildingURL}?action=LIST&message=error_system";
+				
+			}
+		});
+	}
+	
+	function editBuilding(data, id){
+		
+	}
+	
+	
+</script>
 
 </body>
 </html>
