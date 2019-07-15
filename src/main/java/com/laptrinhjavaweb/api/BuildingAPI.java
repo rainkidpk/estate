@@ -35,9 +35,9 @@ public class BuildingAPI extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json");
 		BuildingDTO buildingDTO = HttpUtils.of(request.getReader()).toModel(BuildingDTO.class);
-		 buildingDTO = buildingService.save(buildingDTO);
+		buildingDTO = buildingService.save(buildingDTO);
 		// buildingDTO = buildingService.update(buildingDTO, buildingDTO.getId());
-		//buildingService.delete(buildingDTO, buildingDTO.getId());	
+		// buildingService.delete(buildingDTO, buildingDTO.getId());
 		// buildingService.findById(id);
 
 		objectMapper.writeValue(response.getOutputStream(), buildingDTO);
@@ -65,23 +65,24 @@ public class BuildingAPI extends HttpServlet {
 
 	}
 
-//	private Long getId(HttpServletRequest request) {
-//		String strId = request.getParameter("id");
-//		if(strId != null) {
-//			return Long.parseLong(strId);
-//		}
-//		return null;
-//	}
+	protected void doPut(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("application/json");
+		BuildingDTO updateBuilding = HttpUtils.of(request.getReader()).toModel(BuildingDTO.class);
+		updateBuilding = buildingService.update(updateBuilding, updateBuilding.getId());
+		objectMapper.writeValue(response.getOutputStream(), "{}");
+	}
+	
+	protected void doDelete(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("application/json");
+		BuildingDTO buildingDTO = HttpUtils.of(request.getReader()).toModel(BuildingDTO.class);
+		buildingService.delete(buildingDTO.getIds());
+		objectMapper.writeValue(response.getOutputStream(), "{}");
+	}
 
-	/*
-	 * protected void doPut(HttpServletRequest request, HttpServletResponse
-	 * response) throws ServletException, IOException {
-	 * 
-	 * }
-	 * 
-	 * protected void doDelete(HttpServletRequest request, HttpServletResponse
-	 * response) throws ServletException, IOException {
-	 * 
-	 * }
-	 */
 }

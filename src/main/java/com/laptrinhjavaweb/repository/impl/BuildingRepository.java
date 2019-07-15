@@ -26,7 +26,8 @@ public class BuildingRepository extends AbstractJDBC<BuildingEntity> implements 
 			whereClause.append(" AND costrent <= " + buildingSearchBuilder.getCostRentTo() + "");
 		}
 
-		if (StringUtils.isNotBlank(buildingSearchBuilder.getAreaRentFrom()) || StringUtils.isNotBlank(buildingSearchBuilder.getAreaRentTo())) {
+		if (StringUtils.isNotBlank(buildingSearchBuilder.getAreaRentFrom())
+				|| StringUtils.isNotBlank(buildingSearchBuilder.getAreaRentTo())) {
 			whereClause.append(" AND EXISTS (SELECT * FROM rentarea ra WHERE (ra.buildingid = A.id");
 			if (buildingSearchBuilder.getAreaRentFrom() != null) {
 				whereClause.append(" AND ra.value >= '" + buildingSearchBuilder.getAreaRentFrom() + "'");
@@ -38,14 +39,16 @@ public class BuildingRepository extends AbstractJDBC<BuildingEntity> implements 
 		}
 		if (buildingSearchBuilder.getBuildingTypes().length > 0) {
 			whereClause.append(" AND (A.type LIKE '%" + buildingSearchBuilder.getBuildingTypes()[0] + "%'");
-			/*for (String type : buildingSearchBuilder.getBuildingTypes()) {
-				if (!type.equals(buildingSearchBuilder.getBuildingTypes())) {
-					whereClause.append(" OR A.type LIKE '%" + buildingSearchBuilder.getBuildingTypes() + "%'");
-				}		
-			}*/
-			Arrays.stream(buildingSearchBuilder.getBuildingTypes()).filter(item -> !item.equals(buildingSearchBuilder.getBuildingTypes()[0]))
-							.forEach(item -> whereClause.append(" OR A.type LIKE '%" + item + "%'"));
-			
+			/*
+			 * for (String type : buildingSearchBuilder.getBuildingTypes()) { if
+			 * (!type.equals(buildingSearchBuilder.getBuildingTypes())) {
+			 * whereClause.append(" OR A.type LIKE '%" +
+			 * buildingSearchBuilder.getBuildingTypes() + "%'"); } }
+			 */
+			Arrays.stream(buildingSearchBuilder.getBuildingTypes())
+					.filter(item -> !item.equals(buildingSearchBuilder.getBuildingTypes()[0]))
+					.forEach(item -> whereClause.append(" OR A.type LIKE '%" + item + "%'"));
+
 			whereClause.append(")");
 		}
 		return findAll(properties, pageble, whereClause.toString());
@@ -60,16 +63,21 @@ public class BuildingRepository extends AbstractJDBC<BuildingEntity> implements 
 						&& !field.getName().startsWith("areaRent")) {
 					field.setAccessible(true);
 					if (field.get(buildingSearchBuilder) != null) {
-						if(field.getName().equals("buildingArea") && field.getName().equals("numberOfBasement")) {
-							result.put(field.getName().toLowerCase(), Integer.parseInt(((String) field.get(buildingSearchBuilder))));
-						}  else {
+						if (field.getName().equals("buildingArea") || field.getName().equals("numberOfBasement")) {
+							if (field.get(buildingSearchBuilder) != "") {
+								result.put(field.getName().toLowerCase(),
+										Integer.parseInt(((String) field.get(buildingSearchBuilder))));
+							}
+
+						} else {
 							result.put(field.getName().toLowerCase(), field.get(buildingSearchBuilder));
 						}
-						
+
 					}
+
 				}
 			}
-		} catch ( IllegalArgumentException | IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 

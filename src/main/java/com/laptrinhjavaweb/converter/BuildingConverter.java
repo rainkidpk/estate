@@ -1,13 +1,9 @@
 package com.laptrinhjavaweb.converter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;

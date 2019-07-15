@@ -504,6 +504,50 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 		return result;
 	}
 
+	@Override
+	public void deleteByProperties(String where) {
+		Connection conn = null;
+		Statement statement = null;
+		try {
+			conn = getConnection();
+			conn.setAutoCommit(false);
+			String tableName = "";
+			if (zClass.isAnnotationPresent(Table.class)) {
+				Table table = zClass.getAnnotation(Table.class);
+				tableName = table.name();
+			}
+
+			String sql = "DELETE FROM " + tableName + " " +where;
+			statement = conn.createStatement();
+			
+			if (conn != null) {		
+				statement.execute(sql);
+				conn.commit();
+
+			}
+		} catch (SQLException e) {
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		} finally {
+			try {
+				if (conn != null) {
+
+				}
+				if (statement != null) {
+					statement.close();
+				}
+			} catch (SQLException e2) {
+				e2.printStackTrace();
+			}
+		}
+		
+	}
+
 	
 
 }

@@ -14,6 +14,7 @@ public interface GenericJDBC<T> {
 	Long insert(Object object);
 	void update(Object object);
 	void delete(long id);
+	void deleteByProperties(String where);
 	<T> T findById(long id);
 	List<T> findAll(Map<String, Object> properties,Pageble pageble,Object... where);
 	

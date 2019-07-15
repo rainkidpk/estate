@@ -8,7 +8,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Cập nhật tòa nhà</title>
 </head>
 <body>
 	<div class="main-content">
@@ -217,7 +217,20 @@
 	}
 	
 	function editBuilding(data, id){
-		
+		$.ajax({
+			url: '${buildingAPI}',
+			data: JSON.stringify(data),
+			type: 'PUT',			
+			contentType: 'application/json',				
+			success: function(data) {
+				window.location.href = "${buildingURL}?action=EDIT&id="+id+"&message=update_success";
+				
+			},
+			error: function() {
+				window.location.href = "${buildingURL}?action=LIST&message=error_system";
+				
+			}
+		});
 	}
 	
 	

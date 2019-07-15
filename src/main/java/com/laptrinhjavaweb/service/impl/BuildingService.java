@@ -62,20 +62,35 @@ public class BuildingService implements IBuildingService {
 	}
 
 	@Override
-	public BuildingDTO update(BuildingDTO buildingDTO, Long id) {
-		BuildingConverter buildingConverter = new BuildingConverter();
-		BuildingEntity buildingEntity = buildingConverter.converterToEntity(buildingDTO);
-		buildingEntity.setCreatedDate(new Timestamp(System.currentTimeMillis()));
-		buildingRepository.update(buildingEntity);
+	public BuildingDTO update(BuildingDTO buildingDTO, long id) {
+		BuildingEntity oldBuilding = buildingRepository.findById(id);
+		BuildingEntity newBuilding = buildingConverter.converterToEntity(buildingDTO);
+		newBuilding.setCreatedBy(oldBuilding.getCreatedBy());
+		newBuilding.setCreatedDate(oldBuilding.getCreatedDate());	
+		updateRentArea(buildingDTO.getRentArea(),id);
+		newBuilding.setType(StringUtils.join(buildingDTO.getBuildingTypes(), ","));
+		buildingRepository.update(newBuilding);
 		return null;
 	}
 
+	private void updateRentArea(String rentArea, long buildingId) {
+		//delete rent area by buildingid
+		rentAreaRepository.deleteByBuilding(buildingId);
+		//insert rent area
+		for (String item : rentArea.split(",")) {
+			RentAreaEntity rentAreaEntity = new RentAreaEntity();
+			rentAreaEntity.setBuildingId(buildingId);
+			rentAreaEntity.setValue(item);
+			rentAreaRepository.insert(rentAreaEntity);
+		}
+	}
+
 	@Override
-	public BuildingDTO delete(BuildingDTO buildingDTO, Long id) {
-		BuildingConverter buildingConverter = new BuildingConverter();
-		BuildingEntity buildingEntity = buildingConverter.converterToEntity(buildingDTO);
-		buildingRepository.delete(id);
-		return null;
+	public void delete(Long[] ids) {
+		for (long item : ids) {
+			rentAreaRepository.deleteByBuilding(item);
+			buildingRepository.delete(item);
+		}
 	}
 
 	@Override
