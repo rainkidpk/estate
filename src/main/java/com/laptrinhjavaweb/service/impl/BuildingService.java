@@ -115,6 +115,11 @@ public class BuildingService implements IBuildingService {
 		return buildingConverter.converterToDto(buildingRepository.findById(id));
 	}
 
+	@Override
+	public int getTotalItem(BuildingSearchBuilder builder) {	
+		return buildingRepository.countByProperty(builder);
+	}
+
 	
 
 }

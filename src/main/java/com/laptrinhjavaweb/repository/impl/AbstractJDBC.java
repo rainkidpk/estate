@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.laptrinhjavaweb.annotation.Column;
 import com.laptrinhjavaweb.annotation.Table;
@@ -39,9 +40,9 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 	private Connection getConnection() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			String databaseURL = "jdbc:mysql://localhost:3306/estate-4-2019";
+			String databaseURL = "jdbc:mysql://localhost:3306/estatejdbc";
 			String user = "root";
-			String password = "123456";
+			String password = "1234";
 			return DriverManager.getConnection(databaseURL, user, password);
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
@@ -431,18 +432,19 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 		ResultSetMapper<T> resultSetMapper = new ResultSetMapper<T>();
 
 		StringBuilder sql = createSQLfindAll(properties);
-		if (where != null && where.length > 0) {
+		if (where != null && where.length >= 1) {
 			sql.append(where[0]);
 		}
-		if (pageble != null) {
-			if (pageble.getOffset() != null) {
+		if (pageble != null) {	
+			if(pageble.getSorter() != null) {
+				if(StringUtils.isNotBlank(pageble.getSorter().getSortName())) {
 				Sorter sorter = pageble.getSorter();
-				sql.append(" ORDER BY " +sorter.getSortName()+ " " +sorter.getSortBy()+"");
+				sql.append(" ORDER BY "+sorter.getSortName()+" "+sorter.getSortBy());
+				}
+			}	
+			if(pageble.getOffset() != null && pageble.getLimit() != null) {
+				sql.append(" LIMIT "+pageble.getOffset()+","+pageble.getLimit()+"");
 			}
-			if (pageble.getOffset() != null && pageble.getLimit() != null) {
-				sql.append(" LIMIT " +pageble.getOffset()+ ", "+pageble.getLimit()+"");
-			}
-
 		}
 		try {
 			conn = getConnection();
@@ -469,7 +471,7 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 				e2.printStackTrace();
 			}
 		}
-		return null;
+		return new ArrayList<>();
 	}
 
 	private StringBuilder createSQLfindAll(Map<String, Object> properties) {
@@ -545,6 +547,80 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 				e2.printStackTrace();
 			}
 		}
+		
+	}
+
+	@Override
+	public int countByProperty(Map<String, Object> properties,Object... where) {
+		Connection conn = null;
+		Statement statement = null;
+		ResultSet rs = null;
+
+		StringBuilder sql = createSQLCountByProperty(properties);
+		if (where != null && where.length >= 1) {
+			sql.append(where[0]);
+		}
+		
+		try {
+			conn = getConnection();
+			statement = conn.createStatement();
+			rs = statement.executeQuery(sql.toString());
+			if (conn != null) {
+				while(rs.next()) {
+					return rs.getInt("COUNT(*)");
+				}
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+				if (statement != null) {
+					statement.close();
+				}
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (SQLException e2) {
+				e2.printStackTrace();
+			}
+		}
+		return 0;
+	}
+
+	private StringBuilder createSQLCountByProperty(Map<String, Object> properties) {
+		String tableName = "";
+		if (zClass.isAnnotationPresent(Table.class)) {
+			Table table = zClass.getAnnotation(Table.class);
+			tableName = table.name();
+		}
+
+		StringBuilder result = new StringBuilder("SELECT COUNT(*) FROM " + tableName + " A WHERE 1=1");
+		if (properties != null && properties.size() > 0) {
+			String[] params = new String[properties.size()];
+			Object[] values = new Object[properties.size()];
+			int i = 0;
+			for (Map.Entry<?, ?> item : properties.entrySet()) {
+				params[i] = (String) item.getKey();
+				values[i] = item.getValue();
+				i++;
+			}
+			for (int i1 = 0; i1 < params.length; i1++) {
+				if (values[i1] instanceof String) {
+					result.append(" and LOWER(" + params[i1] + ") LIKE '%" + values[i1].toString().toLowerCase() + "%' ");
+				} else if (values[i1] instanceof Integer) {
+					result.append(" and " + params[i1] + " = " + values[i1] + " ");
+				} else if (values[i1] instanceof Long) {
+					result.append(" and " + params[i1] + " = " + values[i1] + " ");
+				}			
+				
+			}
+
+		}
+		return result;
 		
 	}
 

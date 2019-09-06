@@ -18,39 +18,7 @@ public class BuildingRepository extends AbstractJDBC<BuildingEntity> implements 
 	@Override
 	public List<BuildingEntity> findAll(BuildingSearchBuilder buildingSearchBuilder, Pageble pageble) {
 		Map<String, Object> properties = buildMapSearch(buildingSearchBuilder);
-		StringBuilder whereClause = new StringBuilder();
-		if (StringUtils.isNotBlank(buildingSearchBuilder.getCostRentFrom())) {
-			whereClause.append(" AND costrent >= " + buildingSearchBuilder.getCostRentFrom() + "");
-		}
-		if (StringUtils.isNotBlank(buildingSearchBuilder.getCostRentTo())) {
-			whereClause.append(" AND costrent <= " + buildingSearchBuilder.getCostRentTo() + "");
-		}
-
-		if (StringUtils.isNotBlank(buildingSearchBuilder.getAreaRentFrom())
-				|| StringUtils.isNotBlank(buildingSearchBuilder.getAreaRentTo())) {
-			whereClause.append(" AND EXISTS (SELECT * FROM rentarea ra WHERE (ra.buildingid = A.id");
-			if (buildingSearchBuilder.getAreaRentFrom() != null) {
-				whereClause.append(" AND ra.value >= '" + buildingSearchBuilder.getAreaRentFrom() + "'");
-			}
-			if (buildingSearchBuilder.getAreaRentTo() != null) {
-				whereClause.append(" AND ra.value <= '" + buildingSearchBuilder.getAreaRentTo() + "'");
-			}
-			whereClause.append("))");
-		}
-		if (buildingSearchBuilder.getBuildingTypes().length > 0) {
-			whereClause.append(" AND (A.type LIKE '%" + buildingSearchBuilder.getBuildingTypes()[0] + "%'");
-			/*
-			 * for (String type : buildingSearchBuilder.getBuildingTypes()) { if
-			 * (!type.equals(buildingSearchBuilder.getBuildingTypes())) {
-			 * whereClause.append(" OR A.type LIKE '%" +
-			 * buildingSearchBuilder.getBuildingTypes() + "%'"); } }
-			 */
-			Arrays.stream(buildingSearchBuilder.getBuildingTypes())
-					.filter(item -> !item.equals(buildingSearchBuilder.getBuildingTypes()[0]))
-					.forEach(item -> whereClause.append(" OR A.type LIKE '%" + item + "%'"));
-
-			whereClause.append(")");
-		}
+		StringBuilder whereClause = buildWhereClause(buildingSearchBuilder);
 		return findAll(properties, pageble, whereClause.toString());
 	}
 
@@ -82,6 +50,52 @@ public class BuildingRepository extends AbstractJDBC<BuildingEntity> implements 
 		}
 
 		return result;
+	}
+
+	@Override
+	public int countByProperty(BuildingSearchBuilder buildingSearchBuilder) {
+		Map<String, Object> properties = buildMapSearch(buildingSearchBuilder);
+		StringBuilder whereClause = buildWhereClause(buildingSearchBuilder);
+		return countByProperty(properties, whereClause.toString());
+	}
+
+	private StringBuilder buildWhereClause(BuildingSearchBuilder buildingSearchBuilder) {
+		StringBuilder whereClause = new StringBuilder();
+		if (StringUtils.isNotBlank(buildingSearchBuilder.getCostRentFrom())) {
+			whereClause.append(" AND costrent >= " + buildingSearchBuilder.getCostRentFrom() + "");
+		}
+		if (StringUtils.isNotBlank(buildingSearchBuilder.getCostRentTo())) {
+			whereClause.append(" AND costrent <= " + buildingSearchBuilder.getCostRentTo() + "");
+		}
+
+		if (StringUtils.isNotBlank(buildingSearchBuilder.getAreaRentFrom())
+				|| StringUtils.isNotBlank(buildingSearchBuilder.getAreaRentTo())) {
+			whereClause.append(" AND EXISTS (SELECT * FROM rentarea ra WHERE (ra.buildingid = A.id");
+			if (buildingSearchBuilder.getAreaRentFrom() != null) {
+				whereClause.append(" AND ra.value >= '" + buildingSearchBuilder.getAreaRentFrom() + "'");
+			}
+			if (buildingSearchBuilder.getAreaRentTo() != null) {
+				whereClause.append(" AND ra.value <= '" + buildingSearchBuilder.getAreaRentTo() + "'");
+			}
+			whereClause.append("))");
+		}
+		if (buildingSearchBuilder.getBuildingTypes().length > 0) {
+			whereClause.append(" AND (A.type LIKE '%" + buildingSearchBuilder.getBuildingTypes()[0] + "%'");
+
+			for (String type : buildingSearchBuilder.getBuildingTypes()) {
+				if (!type.equals(buildingSearchBuilder.getBuildingTypes())) {
+					whereClause.append(" OR A.type LIKE '%" + buildingSearchBuilder.getBuildingTypes() + "%'");
+				}
+			}
+
+			/*
+			 * Arrays.stream(buildingSearchBuilder.getBuildingTypes()) .filter(item ->
+			 * !item.equals(buildingSearchBuilder.getBuildingTypes()[0])) .forEach(item ->
+			 * whereClause.append(" OR A.type LIKE '%" + item + "%'"));
+			 */
+			whereClause.append(")");
+		}
+		return whereClause;
 	}
 
 }

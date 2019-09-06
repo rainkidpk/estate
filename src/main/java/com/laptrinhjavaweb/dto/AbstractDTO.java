@@ -7,18 +7,49 @@ import java.util.List;
 public class AbstractDTO<T> {
 	
 	private Long id;
-	private String createdBy;
-	private String modifiedBy;
-	private Timestamp createdDate;
+	private Timestamp createdDate; 
 	private Timestamp modifiedDate;
-	private int maxPageItem = 10;
-	private int page = 1;
+	private String createdBy; 
+	private String modifiedBy;
+	private int maxPageItem;
+	private int page;
 	private String action;
-	private List<T> listResults = new ArrayList<T>();
+	private List<T> listResult = new ArrayList<T>();
 	private Long[] ids;
-	
-	
-	
+	private int totalPages = 0;
+	private int totalItems = 0;
+	private String sortName;
+	private String sortBy;
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Timestamp getCreatedDate() {
+		return createdDate;
+	}
+	public void setCreatedDate(Timestamp createdDate) {
+		this.createdDate = createdDate;
+	}
+	public Timestamp getModifiedDate() {
+		return modifiedDate;
+	}
+	public void setModifiedDate(Timestamp modifiedDate) {
+		this.modifiedDate = modifiedDate;
+	}
+	public String getCreatedBy() {
+		return createdBy;
+	}
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+	public String getModifiedBy() {
+		return modifiedBy;
+	}
+	public void setModifiedBy(String modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
 	public int getMaxPageItem() {
 		return maxPageItem;
 	}
@@ -37,41 +68,11 @@ public class AbstractDTO<T> {
 	public void setAction(String action) {
 		this.action = action;
 	}
-	public Long getId() {
-		return id;
+	public List<T> getListResult() {
+		return listResult;
 	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getCreatedBy() {
-		return createdBy;
-	}
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
-	}
-	public String getModifiedBy() {
-		return modifiedBy;
-	}
-	public void setModifiedBy(String modifiedBy) {
-		this.modifiedBy = modifiedBy;
-	}
-	public Timestamp getCreatedDate() {
-		return createdDate;
-	}
-	public void setCreatedDate(Timestamp createdDate) {
-		this.createdDate = createdDate;
-	}
-	public Timestamp getModifiedDate() {
-		return modifiedDate;
-	}
-	public void setModifiedDate(Timestamp modifiedDate) {
-		this.modifiedDate = modifiedDate;
-	}
-	public List<T> getListResults() {
-		return listResults;
-	}
-	public void setListResults(List<T> listResults) {
-		this.listResults = listResults;
+	public void setListResult(List<T> listResult) {
+		this.listResult = listResult;
 	}
 	public Long[] getIds() {
 		return ids;
@@ -79,6 +80,36 @@ public class AbstractDTO<T> {
 	public void setIds(Long[] ids) {
 		this.ids = ids;
 	}
+	
+	public int getTotalPages() {
+		return totalPages;
+	}
+	public void setTotalPages(int totalPages) {
+		this.totalPages = totalPages;
+	}
+	public int getTotalItems() {
+		return totalItems;
+	}
+	public void setTotalItems(int totalItems) {
+		this.totalItems = totalItems;
+	}
+	public String getSortName() {
+		return sortName;
+	}
+	public void setSortName(String sortName) {
+		this.sortName = sortName;
+	}
+	public String getSortBy() {
+		return sortBy;
+	}
+	public void setSortBy(String sortBy) {
+		this.sortBy = sortBy;
+	}
+	
+	
+	
+	
+	
 	
 	
 	

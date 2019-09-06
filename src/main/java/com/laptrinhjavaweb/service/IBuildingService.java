@@ -13,4 +13,5 @@ public interface IBuildingService {
 	BuildingDTO findById(Long id);
 	List<BuildingDTO> findAll(BuildingSearchBuilder buildingSearchBuilder, Pageble pageRequest);
 	BuildingDTO findById(long id);
+	int getTotalItem(BuildingSearchBuilder builder);
 }

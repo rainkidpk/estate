@@ -23,7 +23,7 @@ public class BuildingConverter {
 	public BuildingDTO converterToDto(BuildingEntity buildingEntity) {
 		ModelMapper modelMapper = new ModelMapper();
 		BuildingDTO result = modelMapper.map(buildingEntity, BuildingDTO.class);
-
+			
 		Map<String, Object> condition = new HashMap<>();
 		condition.put("buildingid", buildingEntity.getId());
 

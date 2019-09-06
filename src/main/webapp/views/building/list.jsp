@@ -25,7 +25,7 @@
 					<div class="col-xs-12">
 
 						<!-- start form -->
-						<form action="${buildingURL}" method="get">
+						<form action="${buildingURL}" method="get" id="formSubmit">
 							<!-- search box -->
 							<div class="widget-box table-filter">
 								<div class="widget-header">
@@ -193,6 +193,8 @@
 
 								</div>
 							</div>
+							<input type="hidden" value="" id="page" name="page"/>
+							<input type="hidden" value="2" id="maxPageItem" name="maxPageItem"/>
 							<!-- end search -->
 						</form>
 						
@@ -239,7 +241,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								<c:forEach var="item" items="${model.listResults}">
+								<c:forEach var="item" items="${model.listResult}">
 									<tr>
 										<td><input type="checkbox" value="${item.id}" id="checkbox_${item.id}"></td>
 										<td>${item.name}</td>
@@ -261,6 +263,11 @@
 							</tbody>
 						</table>
 					</div>
+				</div>
+				<div class="container">			   
+				      <nav aria-label="Page navigation">
+				        <ul class="pagination" id="pagination"></ul>
+				    	</nav>			   
 				</div>
 			</div>
 		</div>
@@ -294,6 +301,24 @@
 			}
 		});
 	}
+	
+	
+	var totalPage = ${model.totalPages};
+	var currentPage = ${model.page};
+	$(function () {
+		var obj = $('#pagination').twbsPagination({
+			totalPages: totalPage,
+            startPage: currentPage,
+            visiblePages: 5,
+            onPageClick: function (event, page) {
+                if (page != currentPage) {
+                    $('#page').val(page);
+                    $('#maxPageItem').val(2);
+                    $('#formSubmit').submit();
+                }
+            }
+        });
+    });
 </script>
 </body>
 </html>

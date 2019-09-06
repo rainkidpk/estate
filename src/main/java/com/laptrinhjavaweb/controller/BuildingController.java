@@ -41,8 +41,10 @@ public class BuildingController extends HttpServlet {
 		if (action.equals("LIST")) {
 			url = "/views/building/list.jsp";
 			BuildingSearchBuilder builder = initBuildingBuilder(model);
-			Pageble pageble = new PageRequest(null, null, null);
-			model.setListResults(buildingService.findAll(builder, pageble));		
+			Pageble pageble = new PageRequest(model.getPage(), model.getMaxPageItem(), null);
+			model.setTotalItems(buildingService.getTotalItem(builder));
+			model.setTotalPages((int)Math.ceil((double)model.getTotalItems()/model.getMaxPageItem()));
+			model.setListResult(buildingService.findAll(builder, pageble));		
 		} else if (action.equals("EDIT")) {
 			if(model.getId() != null) {
 				model = buildingService.findById(model.getId());
