@@ -12,7 +12,7 @@ public class PageRequest implements Pageble {
 		this.sorter = sorter;
 	}
 	@Override
-	public Integer getPage() {
+	public Integer getPage()	{
 		return page;
 	}
 

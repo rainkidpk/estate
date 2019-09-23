@@ -40,7 +40,7 @@ public class AbstractJDBC<T> implements GenericJDBC<T> {
 	private Connection getConnection() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			String databaseURL = "jdbc:mysql://localhost:3306/estatejdbc";
+			String databaseURL = "jdbc:mysql://localhost:3306/estate";
 			String user = "root";
 			String password = "1234";
 			return DriverManager.getConnection(databaseURL, user, password);

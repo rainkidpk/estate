@@ -57,7 +57,9 @@ CREATE TABLE building (
 	timedecorator VARCHAR(255) NULL,
 	managername VARCHAR(255) NULL,
 	managerphone VARCHAR(255) NULL,
-	type TEXT NULL, 
+	type TEXT NULL,
+	direction VARCHAR(255) NULL,
+	level VARCHAR(255) NULL,
 	
 	createddate TIMESTAMP NULL,
 	modifieddate TIMESTAMP NULL,

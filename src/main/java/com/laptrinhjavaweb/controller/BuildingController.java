@@ -14,9 +14,11 @@ import com.laptrinhjavaweb.builder.BuildingSearchBuilder;
 import com.laptrinhjavaweb.dto.BuildingDTO;
 import com.laptrinhjavaweb.paging.PageRequest;
 import com.laptrinhjavaweb.paging.Pageble;
+import com.laptrinhjavaweb.paging.Sorter;
 import com.laptrinhjavaweb.service.IBuildingService;
 import com.laptrinhjavaweb.utils.DataUtils;
 import com.laptrinhjavaweb.utils.FormUtil;
+import org.apache.commons.lang.StringUtils;
 
 @WebServlet(urlPatterns = { "/admin-building" })
 public class BuildingController extends HttpServlet {
@@ -41,7 +43,11 @@ public class BuildingController extends HttpServlet {
 		if (action.equals("LIST")) {
 			url = "/views/building/list.jsp";
 			BuildingSearchBuilder builder = initBuildingBuilder(model);
-			Pageble pageble = new PageRequest(model.getPage(), model.getMaxPageItem(), null);
+			Sorter sorter = new Sorter(null,null);
+			if(StringUtils.isNotBlank(model.getSortName())){
+				sorter = new Sorter(model.getSortName(), model.getSortBy());
+			}
+			Pageble pageble = new PageRequest(model.getPage(), model.getMaxPageItem(), sorter);
 			model.setTotalItems(buildingService.getTotalItem(builder));
 			model.setTotalPages((int)Math.ceil((double)model.getTotalItems()/model.getMaxPageItem()));
 			model.setListResult(buildingService.findAll(builder, pageble));		
